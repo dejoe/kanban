@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="kanban-board">
+        <div class="column" id="backlog">
+            <h2>Backlog</h2>
+            <button onclick="addCard('backlog')">Add Card</button>
+            <div class="cards"></div>
+        </div>
+        <div class="column" id="doing">
+            <h2>Doing</h2>
+            <button onclick="addCard('doing')">Add Card</button>
+            <div class="cards"></div>
+        </div>
+        <div class="column" id="review">
+            <h2>Review</h2>
+            <button onclick="addCard('review')">Add Card</button>
+            <div class="cards"></div>
+        </div>
+        <div class="column" id="done">
+            <h2>Done</h2>
+            <button onclick="addCard('done')">Add Card</button>
+            <div class="cards"></div>
+        </div>
+    </div>
+    <div class="controls">
+        <button onclick="importCards()">Import Cards</button>
+        <button onclick="exportCards()">Export Cards</button>
+    </div>
+    <textarea id="importExportArea" placeholder="Paste JSON here to import or copy JSON to export..."></textarea>
+    <script src="script.js"></script>
+</body>
+</html>
