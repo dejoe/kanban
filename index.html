@@ -7,25 +7,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="header">
+        <h1>Kanban Board</h1>
+    </div>
     <div class="kanban-board">
         <div class="column" id="backlog">
             <h2>Backlog</h2>
-            <button onclick="addCard('backlog')">Add Card</button>
+            <button onclick="openAddCardDialog('backlog')">Add Card</button>
             <div class="cards"></div>
         </div>
         <div class="column" id="doing">
             <h2>Doing</h2>
-            <button onclick="addCard('doing')">Add Card</button>
+            <button onclick="openAddCardDialog('doing')">Add Card</button>
             <div class="cards"></div>
         </div>
         <div class="column" id="review">
             <h2>Review</h2>
-            <button onclick="addCard('review')">Add Card</button>
+            <button onclick="openAddCardDialog('review')">Add Card</button>
             <div class="cards"></div>
         </div>
         <div class="column" id="done">
             <h2>Done</h2>
-            <button onclick="addCard('done')">Add Card</button>
+            <button onclick="openAddCardDialog('done')">Add Card</button>
             <div class="cards"></div>
         </div>
     </div>
@@ -34,6 +37,20 @@
         <button onclick="exportCards()">Export Cards</button>
     </div>
     <textarea id="importExportArea" placeholder="Paste JSON here to import or copy JSON to export..."></textarea>
+
+    <!-- Add Card Dialog -->
+    <dialog id="addCardDialog">
+        <form method="dialog">
+            <h3>Add/Edit Card</h3>
+            <label for="cardTitle">Title:</label>
+            <input type="text" id="cardTitle" required>
+            <label for="cardDescription">Description:</label>
+            <textarea id="cardDescription"></textarea>
+            <button type="submit">Save</button>
+            <button type="button" onclick="closeDialog()">Cancel</button>
+        </form>
+    </dialog>
+
     <script src="script.js"></script>
 </body>
 </html>

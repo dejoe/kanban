@@ -5,6 +5,16 @@ body {
     flex-direction: column;
     align-items: center;
     margin: 0;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    color: #333;
 }
 
 .kanban-board {
@@ -12,8 +22,7 @@ body {
     justify-content: space-around;
     width: 100%;
     max-width: 1200px;
-    padding: 20px;
-    box-sizing: border-box;
+    gap: 20px;
 }
 
 .column {
@@ -24,11 +33,27 @@ body {
     min-width: 250px;
     padding: 10px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .column h2 {
     text-align: center;
     margin-bottom: 10px;
+}
+
+.column button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.column button:hover {
+    background-color: #0056b3;
 }
 
 .cards {
@@ -42,14 +67,53 @@ body {
     padding: 10px;
     cursor: pointer;
     transition: background-color 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-.card:hover {
-    background-color: #d0d0d9;
+.card .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card .title button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.card .title button:hover {
+    color: #0056b3;
+}
+
+.card .description {
+    margin-top: 10px;
+    display: none;
+    white-space: pre-wrap;
 }
 
 .controls {
     margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.controls button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
 }
 
 textarea {
@@ -59,4 +123,52 @@ textarea {
     padding: 10px;
     box-sizing: border-box;
     resize: vertical;
+}
+
+dialog {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px;
+}
+
+dialog form {
+    display: flex;
+    flex-direction: column;
+}
+
+dialog label {
+    margin-top: 10px;
+}
+
+dialog input, dialog textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+dialog button {
+    margin-top: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+dialog button:hover {
+    background-color: #0056b3;
+}
+
+dialog button[type="button"] {
+    background-color: #ccc;
+    color: #333;
+}
+
+dialog button[type="button"]:hover {
+    background-color: #bbb;
+    color: #333;
 }
