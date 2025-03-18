@@ -20,7 +20,7 @@ function openAddCardDialog(columnId, cardId = null) {
 
     if (cardId) {
         const card = document.getElementById(cardId);
-        cardTitleInput.value = card.querySelector('.title').textContent;
+        cardTitleInput.value = card.querySelector('.title span').textContent;
         cardDescriptionInput.value = card.querySelector('.description').textContent;
     } else {
         cardTitleInput.value = '';
@@ -47,7 +47,7 @@ function addCard() {
         if (currentCardId) {
             // Edit existing card
             const card = document.getElementById(currentCardId);
-            card.querySelector('.title').textContent = cardTitle;
+            card.querySelector('.title span').textContent = cardTitle;
             card.querySelector('.description').textContent = cardDescription;
         } else {
             // Create new card

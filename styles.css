@@ -76,18 +76,36 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+.card .title span {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .card .title button {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #888;
+    border-radius: 20px;
+    box-sizing: border-box;
     background: none;
-    border: none;
     color: #007bff;
     cursor: pointer;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
 }
 
 .card .title button:hover {
     color: #0056b3;
+    border-color: #0056b3;
 }
 
 .card .description {
