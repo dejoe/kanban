@@ -1,9 +1,15 @@
 let cardCounter = 0;
 let currentColumnId = '';
 let currentCardId = '';
+let currentBoardId = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadState();
+    loadBoards();
+    if (!currentBoardId) {
+        createDefaultBoard();
+    } else {
+        loadState();
+    }
     document.querySelectorAll('.card').forEach(card => {
         card.draggable = true;
         card.addEventListener('dragstart', dragStart);
@@ -223,11 +229,11 @@ function saveState() {
         });
         data[column.id] = cards;
     });
-    localStorage.setItem('kanbanState', JSON.stringify(data));
+    localStorage.setItem(`kanbanState_${currentBoardId}`, JSON.stringify(data));
 }
 
 function loadState() {
-    const data = JSON.parse(localStorage.getItem('kanbanState'));
+    const data = JSON.parse(localStorage.getItem(`kanbanState_${currentBoardId}`));
     if (data) {
         Object.keys(data).forEach(columnId => {
             data[columnId].forEach(cardData => {
@@ -269,6 +275,147 @@ function loadState() {
     }
 }
 
+function createNewBoard() {
+    const dialog = document.getElementById('createBoardDialog');
+    dialog.showModal();
+}
+
+function closeCreateBoardDialog() {
+    const dialog = document.getElementById('createBoardDialog');
+    dialog.close();
+}
+
+function addBoard() {
+    const dialog = document.getElementById('createBoardDialog');
+    const boardNameInput = document.getElementById('boardName');
+    const boardName = boardNameInput.value.trim();
+
+    if (boardName) {
+        const boardList = document.getElementById('boardList');
+        const li = document.createElement('li');
+
+        const boardButton = document.createElement('button');
+        boardButton.className = 'board-button';
+        boardButton.textContent = boardName;
+        boardButton.onclick = () => switchBoard(boardName);
+        li.appendChild(boardButton);
+
+        const boards = JSON.parse(localStorage.getItem('boards')) || [];
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.textContent = '🗑';
+        deleteButton.onclick = () => deleteBoard(boardName);
+        if (boards.length === 1) {
+            deleteButton.style.display = 'none'; // Hide delete button if only one board
+        } else {
+            deleteButton.style.display = 'block'; // Show delete button if more than one board
+        }
+        li.appendChild(deleteButton);
+
+        boardList.appendChild(li);
+
+        // Save the new board to local storage
+        boards.push(boardName);
+        localStorage.setItem('boards', JSON.stringify(boards));
+
+        // Switch to the new board
+        switchBoard(boardName);
+    }
+    dialog.close();
+}
+
+function switchBoard(boardId) {
+    currentBoardId = boardId;
+    cardCounter = 0; // Reset card counter for the new board
+    clearKanbanBoard();
+    loadState();
+    loadBoards(); // Reload boards to ensure delete buttons are visible
+    highlightActiveBoard();
+}
+
+function clearKanbanBoard() {
+    document.querySelectorAll('.column .cards').forEach(column => {
+        column.innerHTML = '';
+    });
+}
+
+function loadBoards() {
+    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+    const boardList = document.getElementById('boardList');
+    boardList.innerHTML = ''; // Clear existing board list
+
+    boards.forEach(boardName => {
+        const li = document.createElement('li');
+
+        const boardButton = document.createElement('button');
+        boardButton.className = 'board-button';
+        boardButton.textContent = boardName;
+        boardButton.onclick = () => switchBoard(boardName);
+        li.appendChild(boardButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.textContent = '🗑';
+        deleteButton.onclick = () => deleteBoard(boardName);
+        if (boards.length === 1) {
+            deleteButton.style.display = 'none'; // Hide delete button if only one board
+        } else {
+            deleteButton.style.display = 'block'; // Show delete button if more than one board
+        }
+        li.appendChild(deleteButton);
+
+        boardList.appendChild(li);
+    });
+
+    if (boards.length > 0 && !currentBoardId) {
+        currentBoardId = boards[0];
+        switchBoard(currentBoardId); // Ensure the first board is loaded if no board is selected
+    }
+}
+
+function deleteBoard(boardName) {
+    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+    const index = boards.indexOf(boardName);
+    if (index !== -1) {
+        boards.splice(index, 1);
+        localStorage.setItem('boards', JSON.stringify(boards));
+        localStorage.removeItem(`kanbanState_${boardName}`);
+        loadBoards();
+        if (currentBoardId === boardName) {
+            if (boards.length > 0) {
+                switchBoard(boards[0]);
+            } else {
+                createDefaultBoard();
+            }
+        }
+    }
+}
+
+function createDefaultBoard() {
+    const defaultBoardName = 'Default Board';
+    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+    if (!boards.includes(defaultBoardName)) {
+        boards.push(defaultBoardName);
+        localStorage.setItem('boards', JSON.stringify(boards));
+    }
+    switchBoard(defaultBoardName);
+}
+
+function highlightActiveBoard() {
+    const boardButtons = document.querySelectorAll('.board-button');
+    boardButtons.forEach(button => {
+        if (button.textContent === currentBoardId) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+}
+
 document.getElementById('addCardDialog').addEventListener('close', () => {
     addCard();
+});
+
+document.getElementById('createBoardDialog').addEventListener('close', () => {
+    addBoard();
 });
