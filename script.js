@@ -2,20 +2,48 @@ let cardCounter = 0;
 let currentColumnId = '';
 let currentCardId = '';
 let currentBoardId = '';
+let db;
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadBoards();
-    if (!currentBoardId) {
-        createDefaultBoard();
-    } else {
-        loadState();
-    }
-    document.querySelectorAll('.card').forEach(card => {
-        card.draggable = true;
-        card.addEventListener('dragstart', dragStart);
-        card.addEventListener('dragend', dragEnd);
+    initDatabase().then(() => {
+        loadBoards();
+        if (!currentBoardId) {
+            createDefaultBoard();
+        } else {
+            loadState();
+        }
+        document.querySelectorAll('.card').forEach(card => {
+            card.draggable = true;
+            card.addEventListener('dragstart', dragStart);
+            card.addEventListener('dragend', dragEnd);
+        });
     });
 });
+
+async function initDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('kanbanDB', 1);
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains('boards')) {
+                db.createObjectStore('boards', { keyPath: 'name' });
+            }
+            if (!db.objectStoreNames.contains('states')) {
+                db.createObjectStore('states', { keyPath: 'boardId' });
+            }
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
+}
 
 function openAddCardDialog(columnId, cardId = null) {
     currentColumnId = columnId;
@@ -218,7 +246,7 @@ function exportCards() {
     document.getElementById('importExportArea').value = JSON.stringify(data, null, 2);
 }
 
-function saveState() {
+async function saveState() {
     const data = {};
     document.querySelectorAll('.column').forEach(column => {
         const cards = [];
@@ -229,50 +257,76 @@ function saveState() {
         });
         data[column.id] = cards;
     });
-    localStorage.setItem(`kanbanState_${currentBoardId}`, JSON.stringify(data));
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['states'], 'readwrite');
+        const store = transaction.objectStore('states');
+        const request = store.put({ boardId: currentBoardId, data: data });
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
 }
 
-function loadState() {
-    const data = JSON.parse(localStorage.getItem(`kanbanState_${currentBoardId}`));
-    if (data) {
-        Object.keys(data).forEach(columnId => {
-            data[columnId].forEach(cardData => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.id = `card-${cardCounter++}`;
-                card.draggable = true;
-                card.addEventListener('dragstart', dragStart);
-                card.addEventListener('dragend', dragEnd);
+async function loadState() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['states'], 'readonly');
+        const store = transaction.objectStore('states');
+        const request = store.get(currentBoardId);
 
-                const titleContainer = document.createElement('div');
-                titleContainer.className = 'title';
+        request.onsuccess = function(event) {
+            const data = event.target.result?.data;
+            if (data) {
+                Object.keys(data).forEach(columnId => {
+                    data[columnId].forEach(cardData => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.id = `card-${cardCounter++}`;
+                        card.draggable = true;
+                        card.addEventListener('dragstart', dragStart);
+                        card.addEventListener('dragend', dragEnd);
 
-                const title = document.createElement('span');
-                title.textContent = cardData.title;
+                        const titleContainer = document.createElement('div');
+                        titleContainer.className = 'title';
 
-                const toggleButton = document.createElement('button');
-                toggleButton.textContent = '▼'; // Down arrow icon
-                toggleButton.onclick = () => toggleDescription(card);
+                        const title = document.createElement('span');
+                        title.textContent = cardData.title;
 
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = '🗑'; // Trash icon
-                deleteButton.onclick = () => deleteCard(card);
+                        const toggleButton = document.createElement('button');
+                        toggleButton.textContent = '▼'; // Down arrow icon
+                        toggleButton.onclick = () => toggleDescription(card);
 
-                titleContainer.appendChild(title);
-                titleContainer.appendChild(toggleButton);
-                titleContainer.appendChild(deleteButton);
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = '🗑'; // Trash icon
+                        deleteButton.onclick = () => deleteCard(card);
 
-                const description = document.createElement('div');
-                description.className = 'description';
-                description.textContent = cardData.description || '';
+                        titleContainer.appendChild(title);
+                        titleContainer.appendChild(toggleButton);
+                        titleContainer.appendChild(deleteButton);
 
-                card.appendChild(titleContainer);
-                card.appendChild(description);
+                        const description = document.createElement('div');
+                        description.className = 'description';
+                        description.textContent = cardData.description || '';
 
-                document.getElementById(columnId).querySelector('.cards').appendChild(card);
-            });
-        });
-    }
+                        card.appendChild(titleContainer);
+                        card.appendChild(description);
+
+                        document.getElementById(columnId).querySelector('.cards').appendChild(card);
+                    });
+                });
+            }
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
 }
 
 function createNewBoard() {
@@ -285,50 +339,53 @@ function closeCreateBoardDialog() {
     dialog.close();
 }
 
-function addBoard() {
+async function addBoard() {
     const dialog = document.getElementById('createBoardDialog');
     const boardNameInput = document.getElementById('boardName');
     const boardName = boardNameInput.value.trim();
 
     if (boardName) {
-        const boardList = document.getElementById('boardList');
-        const li = document.createElement('li');
+        const boards = await getBoards();
+        if (!boards.includes(boardName)) {
+            boards.push(boardName);
+            await saveBoards(boards);
 
-        const boardButton = document.createElement('button');
-        boardButton.className = 'board-button';
-        boardButton.textContent = boardName;
-        boardButton.onclick = () => switchBoard(boardName);
-        li.appendChild(boardButton);
+            const boardList = document.getElementById('boardList');
+            const li = document.createElement('li');
 
-        const boards = JSON.parse(localStorage.getItem('boards')) || [];
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete-button';
-        deleteButton.textContent = '🗑';
-        deleteButton.onclick = () => deleteBoard(boardName);
-        if (boards.length === 1) {
-            deleteButton.style.display = 'none'; // Hide delete button if only one board
+            const boardButton = document.createElement('button');
+            boardButton.className = 'board-button';
+            boardButton.textContent = boardName;
+            boardButton.onclick = () => switchBoard(boardName);
+            li.appendChild(boardButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.textContent = '🗑';
+            deleteButton.onclick = () => deleteBoard(boardName);
+            if (boards.length === 1) {
+                deleteButton.style.display = 'none'; // Hide delete button if only one board
+            } else {
+                deleteButton.style.display = 'block'; // Show delete button if more than one board
+            }
+            li.appendChild(deleteButton);
+
+            boardList.appendChild(li);
+
+            // Switch to the new board
+            switchBoard(boardName);
         } else {
-            deleteButton.style.display = 'block'; // Show delete button if more than one board
+            alert('Board already exists!');
         }
-        li.appendChild(deleteButton);
-
-        boardList.appendChild(li);
-
-        // Save the new board to local storage
-        boards.push(boardName);
-        localStorage.setItem('boards', JSON.stringify(boards));
-
-        // Switch to the new board
-        switchBoard(boardName);
     }
     dialog.close();
 }
 
-function switchBoard(boardId) {
+async function switchBoard(boardId) {
     currentBoardId = boardId;
     cardCounter = 0; // Reset card counter for the new board
     clearKanbanBoard();
-    loadState();
+    await loadState();
     loadBoards(); // Reload boards to ensure delete buttons are visible
     highlightActiveBoard();
 }
@@ -339,8 +396,8 @@ function clearKanbanBoard() {
     });
 }
 
-function loadBoards() {
-    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+async function loadBoards() {
+    const boards = await getBoards();
     const boardList = document.getElementById('boardList');
     boardList.innerHTML = ''; // Clear existing board list
 
@@ -373,13 +430,13 @@ function loadBoards() {
     }
 }
 
-function deleteBoard(boardName) {
-    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+async function deleteBoard(boardName) {
+    const boards = await getBoards();
     const index = boards.indexOf(boardName);
     if (index !== -1) {
         boards.splice(index, 1);
-        localStorage.setItem('boards', JSON.stringify(boards));
-        localStorage.removeItem(`kanbanState_${boardName}`);
+        await saveBoards(boards);
+        await deleteState(boardName);
         loadBoards();
         if (currentBoardId === boardName) {
             if (boards.length > 0) {
@@ -391,12 +448,12 @@ function deleteBoard(boardName) {
     }
 }
 
-function createDefaultBoard() {
+async function createDefaultBoard() {
     const defaultBoardName = 'Default Board';
-    const boards = JSON.parse(localStorage.getItem('boards')) || [];
+    const boards = await getBoards();
     if (!boards.includes(defaultBoardName)) {
         boards.push(defaultBoardName);
-        localStorage.setItem('boards', JSON.stringify(boards));
+        await saveBoards(boards);
     }
     switchBoard(defaultBoardName);
 }
@@ -409,6 +466,55 @@ function highlightActiveBoard() {
         } else {
             button.classList.remove('active');
         }
+    });
+}
+
+async function getBoards() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['boards'], 'readonly');
+        const store = transaction.objectStore('boards');
+        const request = store.get('boards');
+
+        request.onsuccess = function(event) {
+            const boards = event.target.result?.boards || [];
+            resolve(boards);
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
+}
+
+async function saveBoards(boards) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['boards'], 'readwrite');
+        const store = transaction.objectStore('boards');
+        const request = store.put({ name: 'boards', boards: boards });
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
+}
+
+async function deleteState(boardId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['states'], 'readwrite');
+        const store = transaction.objectStore('states');
+        const request = store.delete(boardId);
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
     });
 }
 
