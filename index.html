@@ -49,11 +49,16 @@
                     <div class="cards"></div>
                 </div>
             </div>
-            <div class="controls">
-                <button onclick="importCards()">Import Cards</button>
-                <button onclick="exportCards()">Export Cards</button>
+            <div class="controls-container">
+                <button id="toggleImportExport" onclick="toggleImportExport()">Import/Export</button>
+                <div id="importExportSection" class="hidden">
+                    <div class="controls">
+                        <button onclick="importCards()">Import Cards</button>
+                        <button onclick="exportCards()">Export Cards</button>
+                    </div>
+                    <textarea id="importExportArea" placeholder="Paste JSON here to import or copy JSON to export..."></textarea>
+                </div>
             </div>
-            <textarea id="importExportArea" placeholder="Paste JSON here to import or copy JSON to export..."></textarea>
         </div>
     </div>
 

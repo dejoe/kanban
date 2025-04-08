@@ -519,6 +519,18 @@ async function deleteState(boardId) {
     });
 }
 
+function toggleImportExport() {
+    const section = document.getElementById('importExportSection');
+    const button = document.getElementById('toggleImportExport');
+    if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        button.textContent = 'Hide Import/Export';
+    } else {
+        section.classList.add('hidden');
+        button.textContent = 'Import/Export';
+    }
+}
+
 document.getElementById('addCardDialog').addEventListener('close', () => {
     addCard();
 });
