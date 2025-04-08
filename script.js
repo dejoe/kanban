@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentBoardId) {
             createDefaultBoard();
         } else {
+            clearKanbanBoard(); // Clear columns before loading the state
             loadState();
         }
         document.querySelectorAll('.card').forEach(card => {
