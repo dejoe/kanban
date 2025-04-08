@@ -330,6 +330,19 @@ async function loadState() {
     });
 }
 
+async function switchBoard(boardId) {
+    currentBoardId = boardId;
+    cardCounter = 0; // Reset card counter for the new board
+    clearKanbanBoard();
+    await loadState();
+    loadBoards(); // Reload boards to ensure delete buttons are visible
+    highlightActiveBoard();
+
+    // Update the header title to match the board's title
+    const boardTitleElement = document.getElementById('boardTitle');
+    boardTitleElement.textContent = boardId;
+}
+
 function createNewBoard() {
     const dialog = document.getElementById('createBoardDialog');
     dialog.showModal();
@@ -380,15 +393,6 @@ async function addBoard() {
         }
     }
     dialog.close();
-}
-
-async function switchBoard(boardId) {
-    currentBoardId = boardId;
-    cardCounter = 0; // Reset card counter for the new board
-    clearKanbanBoard();
-    await loadState();
-    loadBoards(); // Reload boards to ensure delete buttons are visible
-    highlightActiveBoard();
 }
 
 function clearKanbanBoard() {
@@ -457,6 +461,10 @@ async function createDefaultBoard() {
         await saveBoards(boards);
     }
     switchBoard(defaultBoardName);
+
+    // Update the header title to match the default board's title
+    const boardTitleElement = document.getElementById('boardTitle');
+    boardTitleElement.textContent = defaultBoardName;
 }
 
 function highlightActiveBoard() {
