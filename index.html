@@ -12,30 +12,40 @@
     </div>
     <div class="container">
         <div class="sidebar">
-            <h2>Boards</h2>
-            <button onclick="createNewBoard()">Create New Board</button>
+            <div class="sidebar-header">
+                <h2>Boards</h2>
+                <button onclick="createNewBoard()">Add Board</button>
+            </div>
             <ul id="boardList"></ul>
         </div>
         <div class="main-content">
             <div class="kanban-board" id="kanbanBoard">
                 <div class="column" id="backlog">
-                    <h2>Backlog</h2>
-                    <button onclick="openAddCardDialog('backlog')">Add Card</button>
+                    <div class="column-header">
+                        <h2>Backlog</h2>
+                        <button onclick="openAddCardDialog('backlog')">Add Card</button>
+                    </div>
                     <div class="cards"></div>
                 </div>
                 <div class="column" id="doing">
-                    <h2>Doing</h2>
-                    <button onclick="openAddCardDialog('doing')">Add Card</button>
+                    <div class="column-header">
+                        <h2>Doing</h2>
+                        <button onclick="openAddCardDialog('doing')">Add Card</button>
+                    </div>
                     <div class="cards"></div>
                 </div>
                 <div class="column" id="review">
-                    <h2>Review</h2>
-                    <button onclick="openAddCardDialog('review')">Add Card</button>
+                    <div class="column-header">
+                        <h2>Review</h2>
+                        <button onclick="openAddCardDialog('review')">Add Card</button>
+                    </div>
                     <div class="cards"></div>
                 </div>
                 <div class="column" id="done">
-                    <h2>Done</h2>
-                    <button onclick="openAddCardDialog('done')">Add Card</button>
+                    <div class="column-header">
+                        <h2>Done</h2>
+                        <button onclick="openAddCardDialog('done')">Add Card</button>
+                    </div>
                     <div class="cards"></div>
                 </div>
             </div>
