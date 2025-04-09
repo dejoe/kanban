@@ -33,7 +33,7 @@ body {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1400px;
+    /* max-width: 1400px; */
     height: calc(100vh - 60px); /* Adjusting for header height */
 }
 
@@ -181,7 +181,7 @@ body {
     display: flex;
     justify-content: space-around;
     width: 100%;
-    max-width: 1200px;
+    /* max-width: 1200px; */
     gap: 10px;
     height: 70vh; /* Set height to 70vh */
     height: calc(100vh - 155px);
