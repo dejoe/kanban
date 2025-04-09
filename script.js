@@ -533,6 +533,7 @@ function toggleImportExport() {
     if (section.classList.contains('hidden')) {
         section.classList.remove('hidden');
         button.textContent = 'Hide Import/Export';
+        section.scrollIntoView({ behavior: 'smooth' });
     } else {
         section.classList.add('hidden');
         button.textContent = 'Import/Export';

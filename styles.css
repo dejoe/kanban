@@ -6,7 +6,7 @@ body {
     flex-direction: column;
     align-items: center;
     margin: 0;
-    padding: 20px;
+    /* padding: 20px; */
     height: 100vh;
     overflow: hidden;
 }
@@ -15,6 +15,10 @@ body {
 .header {
     text-align: center;
     margin-bottom: 20px;
+    margin-left: 270px;
+    text-align: left;
+    width: calc(100% - 270px);
+    margin-top: 20px;
 }
 
 .header h1 {
@@ -165,10 +169,10 @@ body {
 }
 
 .main-content {
-    width: calc(100% - 270px);
+    width: calc(100% - 250px);
     padding: 0 20px;
     box-sizing: border-box;
-    margin-left: 270px; /* To account for the fixed sidebar */
+    margin-left: 250px; /* To account for the fixed sidebar */
     height: 100%;
     overflow-y: auto;
 }
@@ -178,8 +182,9 @@ body {
     justify-content: space-around;
     width: 100%;
     max-width: 1200px;
-    gap: 20px;
+    gap: 10px;
     height: 70vh; /* Set height to 70vh */
+    height: calc(100vh - 155px);
 }
 
 .column {
@@ -413,7 +418,7 @@ dialog button[type="button"]:hover {
 /* Adjust layout for the import/export section */
 .controls-container {
     margin-top: 20px;
-    text-align: center;
+    text-align: right;
 }
 
 #importExportSection {
