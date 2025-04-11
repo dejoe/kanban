@@ -5,16 +5,10 @@ let currentBoardId = '';
 let db;
 
 document.addEventListener('DOMContentLoaded', () => {
-    initDatabase().then(() => {
-        loadBoards();
-        if (!currentBoardId) {
-            createDefaultBoard();
-        } else {
-            clearKanbanBoard(); // Clear columns before loading the state
-            loadState();
-        }
+    initDatabase()
+        .then(loadBoards)
+        .then(() => {
         document.querySelectorAll('.card').forEach(card => {
-            card.draggable = true;
             card.addEventListener('dragstart', dragStart);
             card.addEventListener('dragend', dragEnd);
         });
@@ -318,6 +312,9 @@ async function loadState() {
                         card.appendChild(description);
 
                         document.getElementById(columnId).querySelector('.cards').appendChild(card);
+
+                        // Ensure description is initially hidden
+                        description.style.display = 'none';
                     });
                 });
             }
@@ -332,10 +329,11 @@ async function loadState() {
 
 async function switchBoard(boardId) {
     currentBoardId = boardId;
+    // highlightActiveBoard();
+    //loadBoards();
     cardCounter = 0; // Reset card counter for the new board
     clearKanbanBoard();
     await loadState();
-    loadBoards(); // Reload boards to ensure delete buttons are visible
     highlightActiveBoard();
 
     // Update the header title to match the board's title
@@ -402,9 +400,14 @@ function clearKanbanBoard() {
 }
 
 async function loadBoards() {
-    const boards = await getBoards();
+    let boards = await getBoards();
     const boardList = document.getElementById('boardList');
     boardList.innerHTML = ''; // Clear existing board list
+
+    if (boards.length === 0) {
+        await createDefaultBoard();
+        boards = await getBoards();
+    }
 
     boards.forEach(boardName => {
         const li = document.createElement('li');
@@ -414,6 +417,8 @@ async function loadBoards() {
         boardButton.textContent = boardName;
         boardButton.onclick = () => switchBoard(boardName);
         li.appendChild(boardButton);
+    
+            
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
@@ -428,7 +433,7 @@ async function loadBoards() {
 
         boardList.appendChild(li);
     });
-
+        
     if (boards.length > 0 && !currentBoardId) {
         currentBoardId = boards[0];
         switchBoard(currentBoardId); // Ensure the first board is loaded if no board is selected
