@@ -70,8 +70,8 @@
             <input type="text" id="cardTitle" required>
             <label for="cardDescription">Description:</label>
             <textarea id="cardDescription"></textarea>
-            <button type="submit">Save</button>
-            <button type="button" onclick="closeDialog()">Cancel</button>
+            <button type="submit" value="submit">Save</button>
+            <button type="button" onclick="this.form.submit()">Cancel</button>
         </form>
     </dialog>
 
@@ -81,8 +81,8 @@
             <h3>Create New Board</h3>
             <label for="boardName">Board Name:</label>
             <input type="text" id="boardName" required>
-            <button type="submit">Create</button>
-            <button type="button" onclick="closeCreateBoardDialog()">Cancel</button>
+            <button type="submit" value="submit">Create</button>
+            <button type="button" onclick="this.form.submit()">Cancel</button>
         </form>
     </dialog>
 
