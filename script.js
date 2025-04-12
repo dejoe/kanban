@@ -59,11 +59,6 @@ function openAddCardDialog(columnId, cardId = null) {
     dialog.showModal();
 }
 
-function closeDialog() {
-    const dialog = document.getElementById('addCardDialog');
-    dialog.close();
-}
-
 function addCard() {
     const dialog = document.getElementById('addCardDialog');
     const cardTitleInput = document.getElementById('cardTitle');
@@ -346,11 +341,6 @@ function createNewBoard() {
     dialog.showModal();
 }
 
-function closeCreateBoardDialog() {
-    const dialog = document.getElementById('createBoardDialog');
-    dialog.close();
-}
-
 async function addBoard() {
     const dialog = document.getElementById('createBoardDialog');
     const boardNameInput = document.getElementById('boardName');
@@ -545,10 +535,14 @@ function toggleImportExport() {
     }
 }
 
-document.getElementById('addCardDialog').addEventListener('close', () => {
-    addCard();
+document.getElementById('addCardDialog').addEventListener('close', (e) => {
+    if (e.target.returnValue) {
+        addCard();
+    }
 });
 
-document.getElementById('createBoardDialog').addEventListener('close', () => {
-    addBoard();
+document.getElementById('createBoardDialog').addEventListener('close', (e) => {
+    if (e.target.returnValue) {
+        addBoard();
+    }
 });
