@@ -359,8 +359,14 @@ dialog form {
 }
 
 dialog label {
-    margin-top: 10px;
+    margin-top: 15px;
     color: #ffffff;
+    margin-bottom: 8px;
+}
+
+dialog h3 {
+    margin-top: 0px;
+    margin-bottom: 10px;
 }
 
 dialog input, dialog textarea {
@@ -369,31 +375,38 @@ dialog input, dialog textarea {
     border-radius: 4px;
     background-color: #3c3c4c;
     color: #ffffff;
+    margin-top: 0px;
 }
 
-dialog button {
-    margin-top: 20px;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: #ffffff;
-    cursor: pointer;
-    transition: background 0.3s;
+dialog .button-group {
+  display: flex;
+  justify-content: end; 
+  align-items: center; /* Align buttons vertically */
+  margin-top:20px;
+  gap: 15px;
 }
 
-dialog button:hover {
-    background: linear-gradient(135deg, #0056b3, #003d80);
+.button-group button:first-child {
+  order: -1; /* Place the first button (Cancel) on the left */
+  background-color: #555; /* Gray background for Cancel */
+  color: #ccc;
 }
 
-dialog button[type="button"] {
-    background-color: #555;
-    color: #ffffff;
+.button-group button:not(:first-child) {
+  background: linear-gradient(135deg, #007bff, #0056b3); /* Blue gradient for Save and Create */
+  color: #ffffff;
 }
 
-dialog button[type="button"]:hover {
-    background-color: #444;
-    color: #ffffff;
+.button-group button:not(:first-child):hover {
+  background: linear-gradient(135deg, #0056b3, #003d80); /* Hover effect */
+}
+
+.button-group button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 /* Hide elements by default */
