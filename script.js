@@ -8,16 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     initDatabase()
         .then(loadBoards)
         .then(() => {
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('dragstart', dragStart);
-            card.addEventListener('dragend', dragEnd);
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('dragstart', dragStart);
+                card.addEventListener('dragend', dragEnd);
+            });
         });
-    });
 });
 
 async function initDatabase() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('kanbanDB', 1);
+        const request = indexedDB.open('kanbanDB', 2); // Incremented version number to 2
 
         request.onupgradeneeded = function(event) {
             db = event.target.result;
@@ -26,6 +26,9 @@ async function initDatabase() {
             }
             if (!db.objectStoreNames.contains('states')) {
                 db.createObjectStore('states', { keyPath: 'boardId' });
+            }
+            if (!db.objectStoreNames.contains('settings')) {
+                db.createObjectStore('settings', { keyPath: 'id' });
             }
         };
 
@@ -324,12 +327,11 @@ async function loadState() {
 
 async function switchBoard(boardId) {
     currentBoardId = boardId;
-    // highlightActiveBoard();
-    //loadBoards();
     cardCounter = 0; // Reset card counter for the new board
     clearKanbanBoard();
     await loadState();
     highlightActiveBoard();
+    saveActiveBoard(); // Save the active board in IndexedDB
 
     // Update the header title to match the board's title
     const boardTitleElement = document.getElementById('boardTitle');
@@ -407,8 +409,6 @@ async function loadBoards() {
         boardButton.textContent = boardName;
         boardButton.onclick = () => switchBoard(boardName);
         li.appendChild(boardButton);
-    
-            
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
@@ -423,9 +423,14 @@ async function loadBoards() {
 
         boardList.appendChild(li);
     });
-        
-    if (boards.length > 0 && !currentBoardId) {
-        currentBoardId = boards[0];
+
+    const activeBoard = await getActiveBoard();
+    if (boards.length > 0) {
+        if (activeBoard) {
+            currentBoardId = activeBoard;
+        } else {
+            currentBoardId = boards[0];
+        }
         switchBoard(currentBoardId); // Ensure the first board is loaded if no board is selected
     }
 }
@@ -511,6 +516,39 @@ async function deleteState(boardId) {
         const transaction = db.transaction(['states'], 'readwrite');
         const store = transaction.objectStore('states');
         const request = store.delete(boardId);
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
+}
+
+async function getActiveBoard() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['settings'], 'readonly');
+        const store = transaction.objectStore('settings');
+        const request = store.get('activeBoard');
+
+        request.onsuccess = function(event) {
+            const activeBoard = event.target.result?.boardId;
+            resolve(activeBoard);
+        };
+
+        request.onerror = function(event) {
+            reject(event.target.error);
+        };
+    });
+}
+
+async function saveActiveBoard() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(['settings'], 'readwrite');
+        const store = transaction.objectStore('settings');
+        const request = store.put({ id: 'activeBoard', boardId: currentBoardId });
 
         request.onsuccess = function() {
             resolve();
