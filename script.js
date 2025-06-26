@@ -7,6 +7,7 @@ let db;
 document.addEventListener('DOMContentLoaded', () => {
     initDatabase()
         .then(loadBoards)
+        .then(checkPersistenceStatusOnLoad) // Call the function here
         .then(() => {
             document.querySelectorAll('.card').forEach(card => {
                 card.addEventListener('dragstart', dragStart);
@@ -584,3 +585,60 @@ document.getElementById('createBoardDialog').addEventListener('close', (e) => {
         addBoard();
     }
 });
+
+async function enablePersistentStorage() {
+    if (navigator.storage && navigator.storage.persist) {
+        try {
+            const isPersisted = await navigator.storage.persisted();
+            if (isPersisted) {
+                console.log('Storage is already persisted.');
+                disablePersistenceButton();
+                return;
+            }
+            const persisted = await navigator.storage.persist();
+            if (persisted) {
+                console.log('Storage persisted successfully.');
+                disablePersistenceButton();
+            } else {
+                console.log('Storage persistence request denied.');
+            }
+        } catch (error) {
+            console.error('Error requesting storage persistence:', error);
+        }
+    } else {
+        console.log('Persistent storage API not supported.');
+    }
+}
+
+function disablePersistenceButton() {
+    const button = document.getElementById('persistenceButton');
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'Storage Persisted';
+        button.classList.add('hidden'); // Hide button using class
+    }
+}
+
+async function checkPersistenceStatusOnLoad() {
+    const button = document.getElementById('persistenceButton');
+    if (!button) return;
+
+    if (navigator.storage && navigator.storage.persisted) {
+        try {
+            const isPersisted = await navigator.storage.persisted();
+            if (isPersisted) {
+                console.log('Storage is already persisted on load.');
+                button.classList.add('hidden'); // Hide button using class
+            } else {
+                console.log('Storage is not persisted on load.');
+                button.classList.remove('hidden'); // Ensure button is visible
+            }
+        } catch (error) {
+            console.error('Error checking persistence status on load:', error);
+            button.classList.remove('hidden'); // Show button by default on error
+        }
+    } else {
+        console.log('Persistent storage API not supported. Hiding button.');
+        button.classList.add('hidden'); // Hide button if API not supported
+    }
+}

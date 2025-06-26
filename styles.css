@@ -48,6 +48,17 @@ body {
     bottom: 0;
     left: 0;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#boardList {
+    flex-grow: 1; /* Make the board list take available space */
+}
+
+#persistenceButton {
+    margin-top: 15px; /* Add some space above the button */
+    border-radius: 25px;
 }
 
 .sidebar h2 {
