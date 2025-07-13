@@ -54,7 +54,7 @@ function openAddCardDialog(columnId, cardId = null) {
     if (cardId) {
         const card = document.getElementById(cardId);
         cardTitleInput.value = card.querySelector('.title span').textContent;
-        cardDescriptionInput.value = card.querySelector('.description').textContent;
+        cardDescriptionInput.value = card.querySelector('.description').innerHTML.replace(/<br>/g, '\n');
     } else {
         cardTitleInput.value = '';
         cardDescriptionInput.value = '';
@@ -76,7 +76,7 @@ function addCard() {
             // Edit existing card
             const card = document.getElementById(currentCardId);
             card.querySelector('.title span').textContent = cardTitle;
-            card.querySelector('.description').textContent = cardDescription;
+            card.querySelector('.description').innerHTML = cardDescription.replace(/\n/g, '<br>');
         } else {
             // Create new card
             const card = document.createElement('div');
@@ -106,7 +106,7 @@ function addCard() {
 
             const description = document.createElement('div');
             description.className = 'description';
-            description.textContent = cardDescription;
+            description.innerHTML = cardDescription.replace(/\n/g, '<br>');
 
             card.appendChild(titleContainer);
             card.appendChild(description);
@@ -212,7 +212,7 @@ function importCards() {
 
                 const description = document.createElement('div');
                 description.className = 'description';
-                description.textContent = cardData.description || '';
+                description.innerHTML = (cardData.description || '').replace(/\n/g, '<br>');
 
                 card.appendChild(titleContainer);
                 card.appendChild(description);
@@ -305,7 +305,7 @@ async function loadState() {
 
                         const description = document.createElement('div');
                         description.className = 'description';
-                        description.textContent = cardData.description || '';
+                        description.innerHTML = (cardData.description || '').replace(/\n/g, '<br>');
 
                         card.appendChild(titleContainer);
                         card.appendChild(description);
