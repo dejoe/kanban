@@ -63,6 +63,11 @@ function openAddCardDialog(columnId, cardId = null) {
     dialog.showModal();
 }
 
+function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+}
+
 function addCard() {
     const dialog = document.getElementById('addCardDialog');
     const cardTitleInput = document.getElementById('cardTitle');
@@ -72,11 +77,12 @@ function addCard() {
     const cardDescription = cardDescriptionInput.value.trim();
 
     if (cardTitle) {
+        const linkedDescription = linkify(cardDescription.replace(/\n/g, '<br>'));
         if (currentCardId) {
             // Edit existing card
             const card = document.getElementById(currentCardId);
             card.querySelector('.title span').textContent = cardTitle;
-            card.querySelector('.description').innerHTML = cardDescription.replace(/\n/g, '<br>');
+            card.querySelector('.description').innerHTML = linkedDescription;
         } else {
             // Create new card
             const card = document.createElement('div');
@@ -106,7 +112,7 @@ function addCard() {
 
             const description = document.createElement('div');
             description.className = 'description';
-            description.innerHTML = cardDescription.replace(/\n/g, '<br>');
+            description.innerHTML = linkedDescription;
 
             card.appendChild(titleContainer);
             card.appendChild(description);
@@ -212,7 +218,7 @@ function importCards() {
 
                 const description = document.createElement('div');
                 description.className = 'description';
-                description.innerHTML = (cardData.description || '').replace(/\n/g, '<br>');
+                description.innerHTML = linkify((cardData.description || '').replace(/\n/g, '<br>'));
 
                 card.appendChild(titleContainer);
                 card.appendChild(description);
@@ -305,7 +311,7 @@ async function loadState() {
 
                         const description = document.createElement('div');
                         description.className = 'description';
-                        description.innerHTML = (cardData.description || '').replace(/\n/g, '<br>');
+                        description.innerHTML = linkify((cardData.description || '').replace(/\n/g, '<br>'));
 
                         card.appendChild(titleContainer);
                         card.appendChild(description);
