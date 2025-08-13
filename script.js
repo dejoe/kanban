@@ -592,6 +592,113 @@ document.getElementById('createBoardDialog').addEventListener('close', (e) => {
     }
 });
 
+async function saveToFile() {
+    try {
+        const transaction = db.transaction(['boards', 'states', 'settings'], 'readonly');
+
+        const boardsStore = transaction.objectStore('boards');
+        const statesStore = transaction.objectStore('states');
+        const settingsStore = transaction.objectStore('settings');
+
+        const boards = await new Promise((resolve, reject) => {
+            const request = boardsStore.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+
+        const states = await new Promise((resolve, reject) => {
+            const request = statesStore.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+
+        const settings = await new Promise((resolve, reject) => {
+            const request = settingsStore.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+
+        const data = {
+            boards: boards,
+            states: states,
+            settings: settings
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const handle = await window.showSaveFilePicker({
+            suggestedName: 'kanban-board.json',
+            types: [{
+                description: 'JSON Files',
+                accept: { 'application/json': ['.json'] },
+            }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        console.log('Database saved successfully!');
+
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Error saving file:', error);
+            alert('Failed to save file. See console for details.');
+        }
+    }
+}
+
+async function loadFromFile(dataToLoad = null) {
+    try {
+        let data = dataToLoad;
+
+        if (!data) {
+            const [fileHandle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON Files',
+                    accept: { 'application/json': ['.json'] },
+                }],
+            });
+
+            const file = await fileHandle.getFile();
+            const content = await file.text();
+            data = JSON.parse(content);
+        }
+
+        if (!data.boards || !data.states || !data.settings) {
+            alert('Invalid JSON file. Please select a valid backup file.');
+            return;
+        }
+
+        const transaction = db.transaction(['boards', 'states', 'settings'], 'readwrite');
+
+        await Promise.all([
+            transaction.objectStore('boards').clear(),
+            transaction.objectStore('states').clear(),
+            transaction.objectStore('settings').clear()
+        ]);
+
+        for (const board of data.boards) {
+            transaction.objectStore('boards').put(board);
+        }
+        for (const state of data.states) {
+            transaction.objectStore('states').put(state);
+        }
+        for (const setting of data.settings) {
+            transaction.objectStore('settings').put(setting);
+        }
+
+        await new Promise(resolve => transaction.oncomplete = resolve);
+
+        alert('Database loaded successfully! The page will now reload.');
+        location.reload();
+
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Error loading file:', error);
+            alert('Failed to load file. See console for details.');
+        }
+    }
+}
+
 async function enablePersistentStorage() {
     if (navigator.storage && navigator.storage.persist) {
         try {

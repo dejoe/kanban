@@ -17,6 +17,10 @@
                 <button onclick="createNewBoard()">Add Board</button>
             </div>
             <ul id="boardList"></ul>
+            <div class="sidebar-controls">
+                <button onclick="saveToFile()" id="saveButton" class="sidebar-button">Save to File</button>
+                <button onclick="loadFromFile()" id="loadButton" class="sidebar-button">Load from File</button>
+            </div>
             <button onclick="enablePersistentStorage()" id="persistenceButton" class="sidebar-button">Enable Persistent Storage</button>
         </div>
         <div class="main-content">
